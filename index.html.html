@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ande Defar Koudiane - Cotisations</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f1f5f9;
+      color: #172033;
+      padding: 15px;
+    }
+
+    header {
+      background: #0755a0;
+      color: white;
+      text-align: center;
+      padding: 25px 15px;
+      border-radius: 14px;
+      margin-bottom: 20px;
+    }
+
+    header h1 {
+      font-size: 23px;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      font-size: 14px;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat, .section {
+      background: white;
+      padding: 18px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px #00000010;
+    }
+
+    .stat h2 {
+      color: #0755a0;
+      font-size: 23px;
+      margin-top: 8px;
+    }
+
+    .section {
+      margin-bottom: 18px;
+    }
+
+    h2 {
+      font-size: 19px;
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      margin: 12px 0 6px;
+      font-weight: bold;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #ccd5df;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    button, .pay-link {
+      display: block;
+      width: 100%;
+      border: none;
+      border-radius: 8px;
+      padding: 13px;
+      margin-top: 12px;
+      background: #0755a0;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .wave {
+      background: #159bdb;
+    }
+
+    .contribution {
+      border-bottom: 1px solid #e5e7eb;
+      padding: 12px 0;
+    }
+
+    .contribution:last-child {
+      border-bottom: none;
+    }
+
+    .status {
+      color: #b45309;
+      font-size: 13px;
+      margin-top: 5px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: #64748b;
+      font-size: 13px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <header>
+      <h1>ANDE DEFAR KOUDIANE</h1>
+      <p>Plateforme officielle des cotisations des membres</p>
+    </header>
+
+    <div class="stats">
+      <div class="stat">
+        Membres ayant déclaré
+        <h2 id="nombre">0</h2>
+      </div>
+
+      <div class="stat">
+        Total déclaré
+        <h2 id="total">0 F</h2>
+      </div>
+    </div>
+
+    <section class="section">
+      <h2>Effectuer une cotisation</h2>
+
+      <form id="formulaire">
+
+        <label for="nom">Nom et prénom</label>
+        <input
+          type="text"
+          id="nom"
+          placeholder="Exemple : Modou Manga"
+          required
+        >
+
+        <label for="montant">Montant de la cotisation</label>
+        <select id="montant" required>
+          <option value="">Choisir un montant</option>
+          <option value="250">250 FCFA</option>
+          <option value="500">500 FCFA</option>
+        </select>
+
+        <button type="submit">Déclarer ma cotisation</button>
+      </form>
+    </section>
+
+    <section class="section">
+      <h2>Payer avec Wave</h2>
+
+      <a class="pay-link wave"
+        href="https://pay.wave.com/m/M_sn_s8o_TUpfCst2/c/sn/?amount=250"
+        target="_blank">
+        Payer 250 F avec Wave
+      </a>
+
+      <a class="pay-link wave"
+        href="https://pay.wave.com/m/M_sn_s8o_TUpfCst2/c/sn/?amount=500"
+        target="_blank">
+        Payer 500 F avec Wave
+      </a>
+
+      <p style="margin-top:12px;font-size:13px;color:#64748b;">
+        Après le paiement, déclare ta cotisation dans le formulaire.
+        La déclaration ne constitue pas une preuve de paiement.
+      </p>
+    </section>
+
+    <section class="section">
+      <h2>Liste des cotisations déclarées</h2>
+      <div id="liste">
+        Aucune cotisation déclarée pour le moment.
+      </div>
+    </section>
+
+    <footer>
+      Association des jeunes Ande Defar Koudiane<br>
+      Ensemble pour le développement de Koudiane.
+    </footer>
+
+  </div>
+
+  <script>
+    const formulaire = document.getElementById("formulaire");
+    const liste = document.getElementById("liste");
+
+    let cotisations = JSON.parse(
+      localStorage.getItem("cotisationsKoudiane") || "[]"
+    );
+
+    function afficherCotisations() {
+      liste.innerHTML = "";
+
+      let total = 0;
+
+      cotisations.forEach(function(cotisation) {
+        total += Number(cotisation.montant);
+
+        const ligne = document.createElement("div");
+        ligne.className = "contribution";
+
+        const nom = document.createElement("strong");
+        nom.textContent = cotisation.nom;
+
+        const montant = document.createElement("p");
+        montant.textContent = cotisation.montant + " FCFA";
+
+        const statut = document.createElement("p");
+        statut.className = "status";
+        statut.textContent = "En attente de vérification";
+
+        ligne.appendChild(nom);
+        ligne.appendChild(montant);
+        ligne.appendChild(statut);
+
+        liste.appendChild(ligne);
+      });
+
+      if (cotisations.length === 0) {
+        liste.textContent = "Aucune cotisation déclarée pour le moment.";
+      }
+
+      document.getElementById("nombre").textContent =
+        cotisations.length;
+
+      document.getElementById("total").textContent =
+        total.toLocaleString("fr-FR") + " F";
+    }
+
+    formulaire.addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const nom = document.getElementById("nom").value.trim();
+      const montant = document.getElementById("montant").value;
+
+      if (!nom || !montant) {
+        alert("Veuillez remplir tous les champs.");
+        return;
+      }
+
+      cotisations.push({
+        nom: nom,
+        montant: montant
+      });
+
+      localStorage.setItem(
+        "cotisationsKoudiane",
+        JSON.stringify(cotisations)
+      );
+
+      formulaire.reset();
+      afficherCotisations();
+
+      alert("Déclaration enregistrée sur cet appareil !");
+    });
+
+    afficherCotisations();
+  </script>
+
+</body>
+</html>
